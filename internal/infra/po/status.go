@@ -24,4 +24,14 @@ var (
 		ReturnedToSender,
 		Exception,
 	}
+	StatusMsgMapping = map[Status]string{
+		Create:            "Created",
+		PackageReceived:   "Package Received",
+		InTransit:         "In Transit",
+		OutForDelivery:    "Out for Delivery",
+		DeliveryAttempted: "Delivery Attempted",
+		Delivered:         "Delivered",
+		ReturnedToSender:  "Returned to Sender",
+		Exception:         "Exception",
+	}
 )

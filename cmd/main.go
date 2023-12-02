@@ -18,11 +18,20 @@ import (
 
 func main() {
 	// Setup
+	viper.SetConfigName("api")
+	viper.SetConfigType("env")
+	viper.AddConfigPath(".")
+	viper.AddConfigPath("./config")
+	if err := viper.ReadInConfig(); err != nil {
+		panic(err)
+	}
+	viper.AutomaticEnv()
 	server := api.New(NewDB())
+
 	// Start server
 	go func() {
 		if err := server.Start(":5000"); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			server.Logger.Fatal("shutting down the server")
+			server.Logger.Fatal("shutting down the server", err.Error())
 		}
 	}()
 

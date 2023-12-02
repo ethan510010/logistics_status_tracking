@@ -19,7 +19,7 @@ func NewFakeDataService(db *gorm.DB) *FakeDataService {
 }
 
 func (f *FakeDataService) ParseLocation() ([]po.Location, error) {
-	data, err := os.ReadFile("datasource/locations.json")
+	data, err := os.ReadFile("internal/service/handlers/locations.json")
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func (f *FakeDataService) ParseLocation() ([]po.Location, error) {
 }
 
 func (f *FakeDataService) ParseRecipient() ([]po.Recipient, error) {
-	data, err := os.ReadFile("datasource/recipients.json")
+	data, err := os.ReadFile("internal/service/handlers/recipients.json")
 	if err != nil {
 		return nil, err
 	}
