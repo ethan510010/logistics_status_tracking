@@ -19,17 +19,8 @@ import (
 )
 
 func main() {
-	// Setup
-	viper.SetConfigName("api")
-	viper.SetConfigType("env")
-	viper.AddConfigPath(".")
-	viper.AddConfigPath("./config")
-	if err := viper.ReadInConfig(); err != nil {
-		panic(err)
-	}
-	viper.AutomaticEnv()
+	LoadConfig()
 	server := api.New(NewDB(), NewCacheStore())
-
 	// Start server
 	go func() {
 		if err := server.Start(":5000"); err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -47,6 +38,18 @@ func main() {
 	if err := server.Shutdown(ctx); err != nil {
 		server.Logger.Fatal(err)
 	}
+}
+
+func LoadConfig() {
+	// Setup
+	viper.SetConfigName("api")
+	viper.SetConfigType("env")
+	viper.AddConfigPath(".")
+	viper.AddConfigPath("./config")
+	if err := viper.ReadInConfig(); err != nil {
+		panic(err)
+	}
+	viper.AutomaticEnv()
 }
 
 func NewDB() *gorm.DB {
