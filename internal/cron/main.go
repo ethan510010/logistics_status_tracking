@@ -1,11 +1,18 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
-	"logistics_status_tracking/internal/infra/po"
 	"os"
 	"time"
 
+	"logistics_status_tracking/internal/infra/po"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -44,7 +51,22 @@ func main() {
 	}
 	report.TrackingSummary = trackingSummary
 
-	fmt.Fprintln(os.Stdout, report)
+	buf := new(bytes.Buffer)
+	if err := json.NewEncoder(buf).Encode(report); err != nil {
+		return
+	}
+
+	uploader := NewS3Uploader()
+
+	bucket := viper.GetString("AWS_S3_TRACKING_BUCKET")
+	filename := fmt.Sprintf("report-%d.json", time.Now().Unix())
+	if _, err := uploader.Upload(&s3manager.UploadInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(filename),
+		Body:   buf,
+	}); err != nil {
+		exitErrorf("Unable to upload %q to %q, %v", filename, bucket, err)
+	}
 }
 
 func loadConfig() {
@@ -69,4 +91,22 @@ func NewDB() *gorm.DB {
 		panic(err)
 	}
 	return db
+}
+
+func NewS3Uploader() *s3manager.Uploader {
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String("ap-northeast-1"),
+		Credentials: credentials.NewStaticCredentials(viper.GetString("AWS_ACCESS_KEY"), viper.GetString("AWS_SECRET"), ""),
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	uploader := s3manager.NewUploader(sess)
+	return uploader
+}
+
+func exitErrorf(msg string, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, msg+"\n", args...)
+	os.Exit(1)
 }
