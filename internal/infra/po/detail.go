@@ -1,23 +1,11 @@
 package po
 
-type Status int
-
-const (
-	Create Status = iota
-	PackageReceived
-	InTransit
-	OutForDelivery
-	DeliveryAttempted
-	Delivered
-	ReturnedToSender
-	Exception
-)
-
 type Detail struct {
-	ID            int64  `gorm:"column:id;primaryKey"`
+	ID            uint32 `gorm:"column:id;primaryKey;autoIncrement"`
 	Date          string `gorm:"column:date"`
 	TimeHour      string `gorm:"column:time"`
-	Status        Status `gorm:"column:status"`
-	LocationID    int64  `gorm:"column:location_id"`
+	Status        int8   `gorm:"column:status"`
+	LocationID    uint32 `gorm:"column:location_id;index:idx_location_id"`
 	LocationTitle string `gorm:"column:location_title"`
+	Sno           uint32 `gorm:"column:sno;index:idx_sno"`
 }

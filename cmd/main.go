@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -20,7 +21,7 @@ func main() {
 	server := api.New(NewDB())
 	// Start server
 	go func() {
-		if err := server.Start(":1323"); err != nil && err != http.ErrServerClosed {
+		if err := server.Start(":5000"); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			server.Logger.Fatal("shutting down the server")
 		}
 	}()
