@@ -1,18 +1,22 @@
 package api
 
 import (
+	"logistics_status_tracking/internal/service/pkg/cachestore"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"gorm.io/gorm"
 )
 
 type Server struct {
-	db *gorm.DB
+	db         *gorm.DB
+	cacheStore *cachestore.RedisStore
 }
 
-func New(db *gorm.DB) *echo.Echo {
+func New(db *gorm.DB, store *cachestore.RedisStore) *echo.Echo {
 	s := &Server{
-		db: db,
+		db:         db,
+		cacheStore: store,
 	}
 	e := echo.New()
 	e.Use(middleware.Logger())

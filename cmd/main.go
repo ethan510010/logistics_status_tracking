@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"logistics_status_tracking/internal/service/pkg/cachestore"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"time"
 
 	"logistics_status_tracking/api"
@@ -26,7 +28,7 @@ func main() {
 		panic(err)
 	}
 	viper.AutomaticEnv()
-	server := api.New(NewDB())
+	server := api.New(NewDB(), NewCacheStore())
 
 	// Start server
 	go func() {
@@ -57,4 +59,10 @@ func NewDB() *gorm.DB {
 		panic(err)
 	}
 	return db
+}
+
+func NewCacheStore() *cachestore.RedisStore {
+	portStr := viper.GetString("REDIS_PORT")
+	port, _ := strconv.Atoi(portStr)
+	return cachestore.NewRedisStore(viper.GetString("REDIS_HOST"), port)
 }
